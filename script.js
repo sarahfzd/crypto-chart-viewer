@@ -98,21 +98,42 @@ async function drawChart(symbol) {
 
         // updateChart(defaultSymbol);
 
-        const date1 = new Date(from * 1000).toISOString();
-        const date2 = new Date(to * 1000).toISOString();
+        const date1 = new Date(params.to * 1000).toISOString();
+        const date2 = new Date(params.from * 1000).toISOString();
 
-        const fromObj = data.find(item => item.time === date1);
-        const toObj = data.find(item => item.time === date2);
+        // const fromObj = data.find(item => item.time === date1);
+        // const toObj = data.find(item => item.time === date2);
+
+        debugger;
+        function searchObj1(data, date1) {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].time === date1) {
+                    return data[i];
+                }
+            }
+        }
+        function searchObj2(data, date2) {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].time === date2) {
+                    return data[i];
+                }
+            }
+        }
+
+        const fromObj = searchObj1(data, date1);
+        const toObj = searchObj2(data, date2);
+
+        console.log(fromObj);
 
         if (!fromObj || !toObj) {
             console.log('Could not find data.');
-            return;
+            return
         }
 
         const fromVolume = fromObj.volume;
         const toVolume = toObj.volume;
 
-        updateChart(fromVolume, toVolume)
+        updateChart(fromVolume, toVolume, fromObj)
 
 
     } catch (error) {
@@ -121,12 +142,10 @@ async function drawChart(symbol) {
 }
 
 
-async function updateChart(fromVolume, toVolume) {
+async function updateChart(fromVolume, toVolume, fromObj) {
 
-    // const toTime = Math.floor(defaultSymbol.time / 1000);
-    // const fromTime = toTime - 7 * 86400;
-
-    console.log(fromVolume, toVolume);
+    const toTime = Math.floor(fromObj.time / 1000);
+    const fromTime = toTime - 7 * 86400;
 
 
     delete ctx;
@@ -138,7 +157,7 @@ async function updateChart(fromVolume, toVolume) {
             labels: [fromTime, toTime],
             datasets: [{
                 // label: '# of Votes',
-                data: [defaultSymbol.high, defaultSymbol.low],
+                data: [fromObj.high, fromObj.low],
             }]
         },
         options: {
