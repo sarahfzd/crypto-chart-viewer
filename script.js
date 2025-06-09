@@ -94,22 +94,25 @@ async function drawChart(symbol) {
         const data = await res.json();
 
         console.log(data);
-        const defaultSymbol = data.find(item => item.symbol === symbol);
+        // const defaultSymbol = data.find(item => item.symbol === symbol);
 
-        updateChart(defaultSymbol);
+        // updateChart(defaultSymbol);
 
-        // const fromObj = data.find(item => item.symbol === symbol && item.time === from);
-        // const toObj = data.find(item => item.symbol === symbol && item.time === to);
+        const date1 = new Date(from * 1000).toISOString();
+        const date2 = new Date(to * 1000).toISOString();
 
-        // if (!fromObj || !toObj) {
-        //     console.log('Could not find data.');
-        //     return;
-        // }
+        const fromObj = data.find(item => item.time === date1);
+        const toObj = data.find(item => item.time === date2);
 
-        // const fromVolume = fromObj.volume;
-        // const toVolume = toObj.volume;
+        if (!fromObj || !toObj) {
+            console.log('Could not find data.');
+            return;
+        }
 
-        // updateChart(fromObj, toObj)
+        const fromVolume = fromObj.volume;
+        const toVolume = toObj.volume;
+
+        updateChart(fromVolume, toVolume)
 
 
     } catch (error) {
@@ -118,10 +121,12 @@ async function drawChart(symbol) {
 }
 
 
-async function updateChart(defaultSymbol) {
+async function updateChart(fromVolume, toVolume) {
 
-    const toTime = Math.floor(defaultSymbol.time / 1000);
-    const fromTime = toTime - 7 * 86400;
+    // const toTime = Math.floor(defaultSymbol.time / 1000);
+    // const fromTime = toTime - 7 * 86400;
+
+    console.log(fromVolume, toVolume);
 
 
     delete ctx;
