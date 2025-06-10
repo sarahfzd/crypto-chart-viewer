@@ -98,30 +98,46 @@ async function drawChart(symbol) {
         const res = await fetch(`https://api.exir.io/v2/chart?symbol=${params.symbol}&resolution=1D&from=${params.from}&to=${params.to}`);
         const data = await res.json();
 
-        let values = [];
-        let i = 0;
-        for (const item of data) {
-            values.push(item.volume)
-            i++;
-        }
-
-        let x = 0;
         let dates = [];
+        let volumes = [];
+        let i = 0;
         for (const item of data) {
             let time = new Date(item.time);
             let secTime = Math.floor(time.getTime() / 1000);
             if (secTime >= params.from && secTime <= params.to) {
-                dates.push(item.volume)
+                volumes.push(item.volume)
+                let isoDate = (item.time).split('T');
+                dates.push(isoDate[0])
             }
+            i++;
         }
+        console.log(dates)
+
+        // let isoDates = [];
+        // let x = 0;
+        // for (let date in dates) {
+        //     const [isoDate, time] = date.split('T');
+        //     isoDates.push(isoDate);
+        //     x++;
+        // }
+        // let x = 0;
+        // let volumes = [];
+        // for (const item of data) {
+        //     let time = new Date(item.time);
+        //     let secTime = Math.floor(time.getTime() / 1000);
+        //     if (secTime >= params.from && secTime <= params.to) {
+        //         volumes.push(item.volume)
+        //     }
+        //     x++;
+        // }
 
         delete ctx;
         const ctx = document.getElementById('myChart');
 
-        const isoDate1 = new Date(params.to * 1000).toISOString();
-        const isoDate2 = new Date(params.from * 1000).toISOString();
-        const [date1, time1] = isoDate1.split('T');
-        const [date2, time2] = isoDate2.split('T');
+        // const isoDate1 = new Date(params.to * 1000).toISOString();
+        // const isoDate2 = new Date(params.from * 1000).toISOString();
+        // const [date1, time1] = isoDate1.split('T');
+        // const [date2, time2] = isoDate2.split('T');
 
 
         if (chartInstance) {
@@ -132,10 +148,10 @@ async function drawChart(symbol) {
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: dates,
+                labels: volumes,
                 datasets: [{
                     label: '',
-                    data: values,
+                    data: dates,
                 }]
             },
             options: {
