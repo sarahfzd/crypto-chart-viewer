@@ -148,10 +148,10 @@ async function drawChart(symbol) {
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: volumes,
+                labels: dates,
                 datasets: [{
-                    label: '',
-                    data: dates,
+                    label: localStorage.getItem("symbol"),
+                    data: volumes,
                 }]
             },
             options: {
