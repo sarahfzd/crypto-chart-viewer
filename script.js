@@ -105,6 +105,15 @@ async function drawChart(symbol) {
             i++;
         }
 
+        let x = 0;
+        let dates = [];
+        for (const item of data) {
+            let time = new Date(item.time);
+            let secTime = Math.floor(time.getTime() / 1000);
+            if (secTime >= params.from && secTime <= params.to) {
+                dates.push(item.volume)
+            }
+        }
 
         delete ctx;
         const ctx = document.getElementById('myChart');
@@ -123,7 +132,7 @@ async function drawChart(symbol) {
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: [date2, date1],
+                labels: dates,
                 datasets: [{
                     label: '',
                     data: values,
