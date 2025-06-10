@@ -103,42 +103,15 @@ async function drawChart(symbol) {
         let i = 0;
         for (const item of data) {
             let time = new Date(item.time);
-            let secTime = Math.floor(time.getTime() / 1000);
-            if (secTime >= params.from && secTime <= params.to) {
-                volumes.push(item.volume)
-                let isoDate = (item.time).split('T');
-                dates.push(isoDate[0])
-            }
+            // let secTime = Math.floor(time.getTime() / 1000);
+            volumes.push(item.volume)
+            let isoDate = (item.time).split('T');
+            dates.push(isoDate[0])
             i++;
         }
-        console.log(dates)
-
-        // let isoDates = [];
-        // let x = 0;
-        // for (let date in dates) {
-        //     const [isoDate, time] = date.split('T');
-        //     isoDates.push(isoDate);
-        //     x++;
-        // }
-        // let x = 0;
-        // let volumes = [];
-        // for (const item of data) {
-        //     let time = new Date(item.time);
-        //     let secTime = Math.floor(time.getTime() / 1000);
-        //     if (secTime >= params.from && secTime <= params.to) {
-        //         volumes.push(item.volume)
-        //     }
-        //     x++;
-        // }
 
         delete ctx;
         const ctx = document.getElementById('myChart');
-
-        // const isoDate1 = new Date(params.to * 1000).toISOString();
-        // const isoDate2 = new Date(params.from * 1000).toISOString();
-        // const [date1, time1] = isoDate1.split('T');
-        // const [date2, time2] = isoDate2.split('T');
-
 
         if (chartInstance) {
             chartInstance.destroy();
