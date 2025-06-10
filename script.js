@@ -1,4 +1,5 @@
 var DateTime = luxon.DateTime;
+let chartInstance = null;
 
 async function loadCoins() {
     try {
@@ -35,6 +36,7 @@ async function loadCoins() {
 
             row.addEventListener("click", () => {
                 const clickedPair = pairKey;
+                localStorage.setItem("symbol", clickedPair);
                 drawChart(clickedPair);
             });
 
@@ -64,108 +66,87 @@ async function loadCoins() {
 loadCoins();
 async function drawChart(symbol) {
 
-    const interval = document.getElementById('resolution').value;
-    const resolution = interval + 'D';
+    // const interval = document.getElementById('resolution').value;
+    // const resolution = '1D';
     const from = document.getElementById('startDate').value;
     const to = document.getElementById('endDate').value;
+    let from1 = new Date(from);
+    let to1 = new Date(to);
+
 
     const userInput = {};
     if (symbol) userInput.symbol = symbol;
-    if (resolution) userInput.resolution = resolution;
-    if (from) userInput.from = Math.floor(from.getTime() / 1000);
-    if (to) userInput.to = Math.floor(to.getTime() / 1000);
+    // if (resolution) userInput.resolution = resolution;
+    if (from) userInput.from = Math.floor(from1.getTime() / 1000);
+    if (to) userInput.to = Math.floor(to1.getTime() / 1000);
 
     const defaultParams = {
         symbol: 'btc-usdt',
-        resolution: "1D",
+        // resolution: "1D",
         from: 1616987453,
         to: 1619579513,
     };
 
     const params = {
         symbol: typeof userInput.symbol === 'string' ? userInput.symbol : defaultParams.symbol,
-        resolution: typeof userInput.resolution === 'string' ? userInput.resolution : defaultParams.resolution,
+        // resolution: typeof userInput.resolution === 'string' ? userInput.resolution : defaultParams.resolution,
         from: typeof userInput.from === 'number' ? userInput.from : defaultParams.from,
         to: typeof userInput.to === 'number' ? userInput.to : defaultParams.to,
     };
 
     try {
-        const res = await fetch(`https://api.exir.io/v2/chart?symbol=${params.symbol}&resolution=${params.resolution}&from=${params.from}&to=${params.to}`);
+        const res = await fetch(`https://api.exir.io/v2/chart?symbol=${params.symbol}&resolution=1D&from=${params.from}&to=${params.to}`);
         const data = await res.json();
 
-        console.log(data);
-        // const defaultSymbol = data.find(item => item.symbol === symbol);
+        let values = [];
+        let i = 0;
+        for (const item of data) {
+            values.push(item.volume)
+            i++;
+        }
 
-        // updateChart(defaultSymbol);
 
-        const date1 = new Date(params.to * 1000).toISOString();
-        const date2 = new Date(params.from * 1000).toISOString();
+        delete ctx;
+        const ctx = document.getElementById('myChart');
 
-        // const fromObj = data.find(item => item.time === date1);
-        // const toObj = data.find(item => item.time === date2);
+        const isoDate1 = new Date(params.to * 1000).toISOString();
+        const isoDate2 = new Date(params.from * 1000).toISOString();
+        const [date1, time1] = isoDate1.split('T');
+        const [date2, time2] = isoDate2.split('T');
 
-        debugger;
-        function searchObj1(data, date1) {
-            for (let i = 0; i < data.length; i++) {
-                if (data[i].time === date1) {
-                    return data[i];
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [date2, date1],
+                datasets: [{
+                    label: '',
+                    data: values,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
                 }
             }
-        }
-        function searchObj2(data, date2) {
-            for (let i = 0; i < data.length; i++) {
-                if (data[i].time === date2) {
-                    return data[i];
-                }
-            }
-        }
-
-        const fromObj = searchObj1(data, date1);
-        const toObj = searchObj2(data, date2);
-
-        console.log(fromObj);
-
-        if (!fromObj || !toObj) {
-            console.log('Could not find data.');
-            return
-        }
-
-        const fromVolume = fromObj.volume;
-        const toVolume = toObj.volume;
-
-        updateChart(fromVolume, toVolume, fromObj)
-
+        });
 
     } catch (error) {
         console.error('Error fetching chart data:', error);
     }
 }
 
+function updateChart() {
+    let symbol = localStorage.getItem("symbol");
+    if (symbol) {
+        drawChart(symbol);
+    }
 
-async function updateChart(fromVolume, toVolume, fromObj) {
-
-    const toTime = Math.floor(fromObj.time / 1000);
-    const fromTime = toTime - 7 * 86400;
-
-
-    delete ctx;
-    const ctx = document.getElementById('myChart');
-
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [fromTime, toTime],
-            datasets: [{
-                // label: '# of Votes',
-                data: [fromObj.high, fromObj.low],
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
 }
