@@ -1,5 +1,6 @@
 var DateTime = luxon.DateTime;
 let chartInstance = null;
+let currentSymbol = null;
 
 async function loadCoins() {
     try {
@@ -15,10 +16,8 @@ async function loadCoins() {
         for (const pairKey in pairs) {
             const pair = pairs[pairKey];
             const [first, second] = pairKey.split("-");
-
             const firstCoin = coins[first];
             const secondCoin = coins[second];
-
 
             const row = document.createElement("tr");
 
@@ -36,7 +35,7 @@ async function loadCoins() {
 
             row.addEventListener("click", () => {
                 const clickedPair = pairKey;
-                localStorage.setItem("symbol", clickedPair);
+                currentSymbol = clickedPair;
                 drawChart(clickedPair);
             });
 
@@ -72,7 +71,6 @@ async function drawChart(symbol) {
     const to = document.getElementById('endDate').value;
     let from1 = new Date(from);
     let to1 = new Date(to);
-
 
     const userInput = {};
     if (symbol) userInput.symbol = symbol;
@@ -111,7 +109,6 @@ async function drawChart(symbol) {
         let uniqueDates = [...new Set(dates)];
 
         let newVolumes = [];
-        debugger
 
         for (let i = 0; i < volumes.length; i += interval) {
             let sliced = volumes.slice(i, i + interval);
@@ -139,13 +136,12 @@ async function drawChart(symbol) {
             chartInstance.destroy();
         }
 
-
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: newDates,
                 datasets: [{
-                    label: localStorage.getItem("symbol"),
+                    label: symbol,
                     data: newVolumes,
                 }]
             },
@@ -164,9 +160,7 @@ async function drawChart(symbol) {
 }
 
 function updateChart() {
-    let symbol = localStorage.getItem("symbol");
-    if (symbol) {
-        drawChart(symbol);
+    if (currentSymbol) {
+        drawChart(currentSymbol);
     }
-
 }
