@@ -95,12 +95,12 @@ async function drawChart(symbol) {
     };
 
     try {
-        const res = await fetch(`https://api.exir.io/v2/chart?symbol=${params.symbol}&resolution=${resolution}&from=${params.from}&to=${params.to}`);
+        const res = await fetch(`https://api.exir.io/v2/chart?symbol=${params.symbol}&resolution=${params.resolution}&from=${params.from}&to=${params.to}`);
         const data = await res.json();
 
         let dates = [];
         let volumes = [];
-        let interval = (params.resolution).split('D')[0];
+        let interval = parseInt((params.resolution).split('D')[0]);
         let i = 0;
         for (const item of data) {
             volumes.push(item.volume)
@@ -110,9 +110,8 @@ async function drawChart(symbol) {
         }
         let uniqueDates = [...new Set(dates)];
 
-        console.log(interval)
-
         let newVolumes = [];
+        debugger
 
         for (let i = 0; i < volumes.length; i += interval) {
             let sliced = volumes.slice(i, i + interval);
@@ -121,8 +120,15 @@ async function drawChart(symbol) {
             newVolumes.push(average);
         }
 
-        console.log(newVolumes);
-
+        let newDates = [];
+        for (let i = 0; i < uniqueDates.length; i += interval) {
+            let sliced = uniqueDates.slice(i, i + interval);
+            const timestamps = sliced.map(dateStr => new Date(dateStr).getTime());
+            const sum = timestamps.reduce((acc, val) => acc + val, 0);
+            const avgTimestamp = sum / timestamps.length;
+            const avgDate = new Date(avgTimestamp).toISOString().split('T')[0];
+            newDates.push(avgDate);
+        }
 
         // const dates = data.map()
 
@@ -137,7 +143,7 @@ async function drawChart(symbol) {
         chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: uniqueDates,
+                labels: newDates,
                 datasets: [{
                     label: localStorage.getItem("symbol"),
                     data: newVolumes,
